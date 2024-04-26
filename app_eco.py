@@ -8,7 +8,7 @@ import altair as alt
 import matplotlib.pyplot as plt
 import numpy_financial as npf
 from mplcursors import cursor
-import io
+#import io
 
 import plotly.graph_objs as go
 
