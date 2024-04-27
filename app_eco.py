@@ -493,7 +493,7 @@ if 'fig_bar' in st.session_state:
     fig_bar_plot = st.session_state.fig_bar
     fig_npv_plot = st.session_state.fig_npv
 
-
+st.write(data)
 if type(output_arr) is not int:
 
     col1,col2,col3 = st.columns(3)
