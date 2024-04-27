@@ -175,9 +175,9 @@ def calculate_func(input_vars_list,method_sel,data):
 
     no_years = 20
 
-    pun = np.empty((pun_t.size,no_years+1))
+    pun = np.zeros((pun_t.size,no_years+1))
     pun[:,0] = pun_t
-    puz = np.empty((puz_t.size,no_years+1))
+    puz = np.zeros((puz_t.size,no_years+1))
     puz[:,0] = puz_t
 
     for i in range(1,pun.shape[1]):
@@ -234,9 +234,9 @@ def calculate_func(input_vars_list,method_sel,data):
     
     hourly_gen_y = hourly_gen_y/1000*plant_sel
 
-    hourly_cons = np.empty((hourly_cons_y.size,no_years))
+    hourly_cons = np.zeros((hourly_cons_y.size,no_years))
     hourly_cons[:,0] = hourly_cons_y
-    hourly_gen = np.empty((hourly_gen_y.size,no_years))
+    hourly_gen = np.zeros((hourly_gen_y.size,no_years))
     hourly_gen[:,0] = hourly_gen_y
 
     for i in range(1,hourly_cons.shape[1]):
@@ -248,14 +248,14 @@ def calculate_func(input_vars_list,method_sel,data):
     # self consumption
 
     ind = hourly_gen<=hourly_cons
-    self_cons = np.empty((hourly_gen.shape[0],hourly_gen.shape[1]))
+    self_cons = np.zeros((hourly_gen.shape[0],hourly_gen.shape[1]))
     self_cons[ind] = hourly_gen[ind]
     self_cons[~ind] = hourly_cons[~ind]
 
-    E_i = np.empty(hourly_gen.shape)
+    E_i = np.zeros(hourly_gen.shape)
     E_i[~ind] = hourly_gen[~ind] - hourly_cons[~ind]
 
-    E_t = np.empty(hourly_gen.shape)
+    E_t = np.zeros(hourly_gen.shape)
     E_t[ind] = hourly_cons[ind] - hourly_gen[ind]
 
     ## calculating Cei and Ot
