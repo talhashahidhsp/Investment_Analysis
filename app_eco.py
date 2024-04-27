@@ -222,6 +222,12 @@ def calculate_func(input_vars_list,method_sel,data):
     ind = puz>RID_price
     RID_price[ind] = puz[ind]
 
+    st.write(sav_price)
+    st.write(cusf_price)
+    st.write(RID_price)
+    st.write(cfd2_price)
+    
+
 
     ## consumption and generation and grid feeding and from grid taking
 
@@ -268,7 +274,6 @@ def calculate_func(input_vars_list,method_sel,data):
     E_t_over_yr = np.transpose(E_t_over_yr).reshape((1,-1))
     E_i_over_yr = np.sum(E_i,axis=0)
     E_i_over_yr = np.transpose(E_i_over_yr).reshape((1,-1))
-    st.write(E_i_over_yr)
     
     #%% amortization schedule and plot
 
