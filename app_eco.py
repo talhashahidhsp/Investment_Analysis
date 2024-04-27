@@ -194,7 +194,9 @@ def calculate_func(input_vars_list,method_sel,data):
     ## defining cusf and RID and saving price
 
     sav_price = np.empty((pun.shape[0],pun.shape[1]+1))
+    st.write(sav_price)
     sav_price = sav_price + saving_price
+    st.write(sav_price)
     cusf_price = np.empty((pun.shape[0],pun.shape[1]+1))
     cusf_price = cusf_price + cusf_price_val
     cfd2_price = np.empty((pun.shape[0],pun.shape[1]+1))
@@ -202,10 +204,6 @@ def calculate_func(input_vars_list,method_sel,data):
     RID_price = np.empty((pun.shape[0],pun.shape[1]+1))
     RID_price = RID_price + RID_price_val
 
-    st.write(sav_price)
-    st.write(cusf_price)
-    st.write(RID_price)
-    st.write(cfd2_price)
     
 
     for i in range(1,sav_price.shape[1]):
