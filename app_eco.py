@@ -202,6 +202,11 @@ def calculate_func(input_vars_list,method_sel,data):
     RID_price = np.empty((pun.shape[0],pun.shape[1]+1))
     RID_price = RID_price + RID_price_val
 
+    st.write(sav_price)
+    st.write(cusf_price)
+    st.write(RID_price)
+    st.write(cfd2_price)
+    
 
     for i in range(1,sav_price.shape[1]):
         sav_price[:,i] = sav_price[:,i-1]*(1+incr_factor)
@@ -222,10 +227,7 @@ def calculate_func(input_vars_list,method_sel,data):
     ind = puz>RID_price
     RID_price[ind] = puz[ind]
 
-    st.write(sav_price)
-    st.write(cusf_price)
-    st.write(RID_price)
-    st.write(cfd2_price)
+
     
 
 
