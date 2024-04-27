@@ -268,6 +268,7 @@ def calculate_func(input_vars_list,method_sel,data):
     E_t_over_yr = np.transpose(E_t_over_yr).reshape((1,-1))
     E_i_over_yr = np.sum(E_i,axis=0)
     E_i_over_yr = np.transpose(E_i_over_yr).reshape((1,-1))
+    st.write(E_i_over_yr)
     
     #%% amortization schedule and plot
 
@@ -493,7 +494,6 @@ if 'fig_bar' in st.session_state:
     fig_bar_plot = st.session_state.fig_bar
     fig_npv_plot = st.session_state.fig_npv
 
-st.write(data)
 if type(output_arr) is not int:
 
     col1,col2,col3 = st.columns(3)
