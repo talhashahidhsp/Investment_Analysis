@@ -90,9 +90,10 @@ with st.sidebar:
             RID_inc = st.number_input("", key="RID_inc", value=2.0, step=0.1,label_visibility="collapsed")
             
         
-        saving_val = st.number_input("Saving price", key="saving_val", value=0.09, step=0.1)
-        strike_val = st.number_input("Strike price", key="strike_val", value=0.09, step=0.1)
+        saving_val = st.number_input("Saving price", key="saving_val", value=0.09, step=0.01)
+        strike_val = st.number_input("Strike price", key="strike_val", value=0.09, step=0.01)
         plant_size = st.number_input("Plant size", key="plant_size", value=450.0, step=0.1)
+        plant_degen = st.number_input("Plant degeneration (%)", key="plant_degen", value=0.55, step=0.001)
         k_e_var = st.number_input("Equity cost (%)", key="k_e_var", value=7.0, step=0.1)
         k_d_var = st.number_input("Interest rate (%)", key="k_d_var", value=3.5, step=0.1)
 
@@ -108,7 +109,7 @@ for i in range(1,2):
 
         
 input_vars_list = np.array([cusf_val,RID_val,cusf_inc,RID_inc,saving_val,
-                            strike_val,plant_size,k_e_var,k_d_var])
+                            strike_val,plant_size,k_e_var,k_d_var,plant_degen])
 
 
 # m = st.markdown("""
@@ -127,9 +128,10 @@ input_vars_list = np.array([cusf_val,RID_val,cusf_inc,RID_inc,saving_val,
 #%% function calculate
 #@st.cache_data
 def calculate_func(input_vars_list,method_sel,data):
-#    incr_factor = input_vars_list[2]/100
+    cusf_incr_factor = input_vars_list[2]/100
+    RID_incr_factor = input_vars_list[3]/100
     incr_factor = 0.02
-    decr_factor = 0.0055
+    decr_factor = input_vars_list[9]/100
     plant_size = input_vars_list[6] ## KW
     plant_sel = plant_size
     current_yr = 2019
@@ -209,10 +211,10 @@ def calculate_func(input_vars_list,method_sel,data):
         sav_price[:,i] = sav_price[:,i-1]*(1+incr_factor)
 
     for i in range(1,cusf_price.shape[1]):
-        cusf_price[:,i] = cusf_price[:,i-1]*(1+incr_factor)
+        cusf_price[:,i] = cusf_price[:,i-1]*(1+cusf_incr_factor)
 
     for i in range(1,RID_price.shape[1]):
-        RID_price[:,i] = RID_price[:,i-1]*(1+incr_factor)
+        RID_price[:,i] = RID_price[:,i-1]*(1+RID_incr_factor)
         
     sav_price = sav_price[:,1:]
     cusf_price = cusf_price[:,1:]
@@ -504,9 +506,9 @@ if type(output_arr) is not int:
     with col1:
         st.metric(label="Pay back time",value=str(int(output_arr[0]))+" years",delta=None)
     with col2:    
-        st.metric(label="IRR in "+str(int(2020+output_arr[3])), value=str(round(output_arr[1],2))+" %", delta=None)
+        st.metric(label="IRR in "+str(int(current_yr+output_arr[3])), value=str(round(output_arr[1],2))+" %", delta=None)
     with col3:    
-        st.metric(label="NPV in "+str(int(2020+output_arr[3])), value="$ "+str(int(output_arr[2])), delta=None)
+        st.metric(label="NPV in "+str(int(current_yr+output_arr[3])), value="$ "+str(int(output_arr[2])), delta=None)
      
     st.markdown(
         """
