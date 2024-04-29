@@ -463,7 +463,7 @@ def calculate_func(input_vars_list,method_sel,data):
     output_arr = np.array([PBT_yr_no,IRR_val,NPV_val,useful_life])
     
 
-    return output_arr,fig,fig_npv,pie_plots_data,hourly_gen,method_sel
+    return output_arr,fig,fig_npv,pie_plots_data,hourly_gen,method_sel,current_yr
 
 #%%
 
@@ -486,13 +486,16 @@ if 'b' in locals():
             st.session_state.en_gen_data_f = 0 
         if 'method_sel_r' not in st.session_state:
             st.session_state.method_sel_r = 0 
-        result_f,fig_bar,fig_npv,pie_plots_data_f,hourly_gen_f,method_sel_r = calculate_func(input_vars_list,method_sel,data)
+        if 'current_yr' not in st.session_state:
+            st.session_state.current_yr = 0 
+        result_f,fig_bar,fig_npv,pie_plots_data_f,hourly_gen_f,method_sel_r,current_yr = calculate_func(input_vars_list,method_sel,data)
         st.session_state.result_f = result_f
         st.session_state.fig_bar = fig_bar
         st.session_state.fig_npv = fig_npv
         st.session_state.pie_plots_data_f = pie_plots_data_f
         st.session_state.hourly_gen_f = hourly_gen_f
         st.session_state.method_sel_r = method_sel_r
+        st.session_state.current_yr = current_yr
         
  
 output_arr = st.session_state.result_f
@@ -506,9 +509,9 @@ if type(output_arr) is not int:
     with col1:
         st.metric(label="Pay back time",value=str(int(output_arr[0]))+" years",delta=None)
     with col2:    
-        st.metric(label="IRR in "+str(int(current_yr+output_arr[3])), value=str(round(output_arr[1],2))+" %", delta=None)
+        st.metric(label="IRR in "+str(int(st.session_state.current_yr+output_arr[3])), value=str(round(output_arr[1],2))+" %", delta=None)
     with col3:    
-        st.metric(label="NPV in "+str(int(current_yr+output_arr[3])), value="$ "+str(int(output_arr[2])), delta=None)
+        st.metric(label="NPV in "+str(int(st.session_state.current_yr+output_arr[3])), value="$ "+str(int(output_arr[2])), delta=None)
      
     st.markdown(
         """
