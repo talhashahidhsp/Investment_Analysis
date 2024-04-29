@@ -127,7 +127,8 @@ input_vars_list = np.array([cusf_val,RID_val,cusf_inc,RID_inc,saving_val,
 #%% function calculate
 #@st.cache_data
 def calculate_func(input_vars_list,method_sel,data):
-    incr_factor = input_vars_list[2]/100
+#    incr_factor = input_vars_list[2]/100
+    incr_factor = 0.02
     decr_factor = 0.0055
     plant_size = input_vars_list[6] ## KW
     plant_sel = plant_size
