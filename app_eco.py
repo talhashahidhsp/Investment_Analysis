@@ -67,6 +67,37 @@ with st.sidebar:
 
 #%%
 
+for i in range(1,2):
+    if st.session_state.cfd_button == True:
+        method_sel = "2-ways CFD"
+    elif st.session_state.rid_button == True:
+        method_sel = "RID"
+    elif st.session_state.net_meter_button == True:
+        method_sel = "Net metering"
+    else:
+        method_sel = "Net metering" 
+
+## adding averaging method selection options for net metering
+
+
+if st.session_state.net_meter_button == True:
+    with st.sidebar:
+        with st.expander("Averaging method"):
+            avg_method_opts_labels_list = np.array(["Hourly",
+                                                    "Daily",
+                                                    "Weekly",
+                                                    "Monthly",
+                                                    "Quarterly",
+                                                    "Bi-annual",
+                                                    "Annual"])
+            avg_method_sel_ui = st.radio(label="Radio button based selection",
+                                         options=avg_method_opts_labels_list,
+                                         index=len(avg_method_opts_labels_list)-1,
+                                         label_visibility="collapsed")
+else:
+    avg_method_sel_ui = "Yearly"
+    
+
 
 
 
@@ -97,15 +128,7 @@ with st.sidebar:
         k_e_var = st.number_input("Equity cost (%)", key="k_e_var", value=7.0, step=0.1)
         k_d_var = st.number_input("Interest rate (%)", key="k_d_var", value=3.5, step=0.1)
 
-for i in range(1,2):
-    if st.session_state.cfd_button == True:
-        method_sel = "2-ways CFD"
-    elif st.session_state.rid_button == True:
-        method_sel = "RID"
-    elif st.session_state.net_meter_button == True:
-        method_sel = "Net metering"
-    else:
-        method_sel = "Net metering"        
+       
 
         
 input_vars_list = np.array([cusf_val,RID_val,cusf_inc,RID_inc,saving_val,
@@ -127,7 +150,7 @@ input_vars_list = np.array([cusf_val,RID_val,cusf_inc,RID_inc,saving_val,
 
 #%% function calculate
 #@st.cache_data
-def calculate_func(input_vars_list,method_sel,data):
+def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     cusf_incr_factor = input_vars_list[2]/100
     RID_incr_factor = input_vars_list[3]/100
     incr_factor = 0.02
@@ -265,11 +288,76 @@ def calculate_func(input_vars_list,method_sel,data):
 
     Cei = E_i*puz
     O_t = E_t*pun
+    
+    ##  calculation based on averaging method selected
+    ## when division is not perfect integer floor it down and add the rest 
+    ## in the final group
+
+    if avg_method_sel_ui == "Hourly":    
+        div_factor_avg = 1  ## no of hours in a day  
+    elif avg_method_sel_ui == "Daily":
+        div_factor_avg = 24
+    elif avg_method_sel_ui == "Weekly":
+        div_factor_avg = 24*7
+    elif avg_method_sel_ui == "Monthly":
+        div_factor_avg = 24*30
+    elif avg_method_sel_ui == "Quarterly":
+        div_factor_avg = 24*30*3
+    elif avg_method_sel_ui == "Bi-annual":
+        div_factor_avg = 24*30*3*2
+    elif avg_method_sel_ui == "Annual":
+        div_factor_avg = 8760
+    else:
+        div_factor_avg = 8760  ## no of hours in a day
+    
+    if (puz.shape[0] % div_factor_avg) != 0:
+        no_of_grs_avg = (int(puz.shape[0]/div_factor_avg))-1
+    else:
+        no_of_grs_avg = (int(puz.shape[0]/div_factor_avg))   
+    
+    puz_t = puz[0:div_factor_avg*no_of_grs_avg,:]
+    pun_t = pun[0:div_factor_avg*no_of_grs_avg,:]
+    E_i_t = E_i[0:div_factor_avg*no_of_grs_avg,:]
+    E_t_t = E_t[0:div_factor_avg*no_of_grs_avg,:]
+    
+    
+    ## now creating the rest of the rows not prcoessed in the previous step
+    
+    puz_t_2 = puz[div_factor_avg*no_of_grs_avg:,:].mean(axis=0)
+    puz_t_2 = puz_t_2.reshape(1,-1)
+    puz_t_2 = np.nan_to_num(puz_t_2)
+    pun_t_2 = pun[div_factor_avg*no_of_grs_avg:,:].mean(axis=0)
+    pun_t_2 = pun_t_2.reshape(1,-1)
+    pun_t_2 = np.nan_to_num(pun_t_2)
+    E_i_t_2 = E_i[div_factor_avg*no_of_grs_avg:,:].sum(axis=0)
+    E_i_t_2 = E_i_t_2.reshape(1,-1)
+    E_t_t_2 = E_t[div_factor_avg*no_of_grs_avg:,:].sum(axis=0)
+    E_t_t_2 = E_t_t_2.reshape(1,-1)
+    
+    
+        
+    puz_t = puz_t.reshape(no_of_grs_avg,div_factor_avg,puz_t.shape[1]).mean(axis=1)
+    pun_t = pun_t.reshape(no_of_grs_avg,div_factor_avg,pun_t.shape[1]).mean(axis=1)
+    E_i_t = E_i_t.reshape(no_of_grs_avg,div_factor_avg,E_i_t.shape[1]).sum(axis=1)
+    E_t_t = E_t_t.reshape(no_of_grs_avg,div_factor_avg,E_t_t.shape[1]).sum(axis=1)
+    
+    
+    
+    
+        
+    Cei = np.concatenate((E_i_t,E_i_t_2),axis=0)*np.concatenate((puz_t,puz_t_2),axis=0)
+    O_t = np.concatenate((E_t_t,E_t_t_2),axis=0)*np.concatenate((pun_t,pun_t_2),axis=0)
+    
+    
+    
+    
+    ##
 
     Cei_over_yr = np.sum(Cei,axis=0)
     Cei_over_yr = np.transpose(Cei_over_yr).reshape((1,-1))
     O_t_over_yr = np.sum(O_t,axis=0)
     O_t_over_yr = np.transpose(O_t_over_yr).reshape((1,-1))
+    
 
     E_t_over_yr = np.sum(E_t,axis=0)
     E_t_over_yr = np.transpose(E_t_over_yr).reshape((1,-1))
@@ -488,7 +576,7 @@ if 'b' in locals():
             st.session_state.method_sel_r = 0 
         if 'current_yr' not in st.session_state:
             st.session_state.current_yr = 0 
-        result_f,fig_bar,fig_npv,pie_plots_data_f,hourly_gen_f,method_sel_r,current_yr = calculate_func(input_vars_list,method_sel,data)
+        result_f,fig_bar,fig_npv,pie_plots_data_f,hourly_gen_f,method_sel_r,current_yr = calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui)
         st.session_state.result_f = result_f
         st.session_state.fig_bar = fig_bar
         st.session_state.fig_npv = fig_npv
