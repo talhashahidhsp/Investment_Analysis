@@ -452,7 +452,7 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     layout = go.Layout(#barmode='stack', 
                        #title=title_str,
                        width=800,height=300,
-                       yaxis=dict(title='MWh',range=[400,ylim_var_m]),
+                       yaxis=dict(title='MWh',range=[400,ylim_var_m*0+1000]),
                        margin=dict(
                            l=50,
                            r=50,
@@ -485,7 +485,7 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     layout = go.Layout(#barmode='stack', 
                         #title=title_str,
                         width=800,height=300,
-                        yaxis=dict(title='MWh',range=[400,ylim_var_2_m]),
+                        yaxis=dict(title='MWh',range=[400,ylim_var_2_m*0+1000]),
                         margin=dict(
                             l=50,
                             r=50,
