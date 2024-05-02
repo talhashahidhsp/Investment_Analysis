@@ -431,6 +431,70 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     service_quota = (np.minimum(E_i_over_yr,E_t_over_yr))*cusf_price[0,:]
     surplus_quota = np.maximum(Cei_over_yr-O_t_over_yr,0)
     net_metering_fee = energy_quota + service_quota + surplus_quota
+    
+    ##
+    hourly_gen_over_yr = (hourly_gen.sum(axis=0).reshape(1,-1))/1000
+    self_cons_over_yr = (self_cons.sum(axis=0).reshape(1,-1))/1000   
+    
+    diff_ca = (hourly_gen_over_yr-self_cons_over_yr)/hourly_gen_over_yr
+    ylim_var = min(diff_ca[0,:])
+    ylim_var = (1-(ylim_var*3))*np.min(hourly_gen_over_yr)
+    
+    # Create traces
+    trace1 = go.Bar(x=loan_yr_arr[0, :], y=hourly_gen_over_yr[0, :], name='Fed into the grid',
+                    offset=0.0)
+    trace2 = go.Bar(x=loan_yr_arr[0, :], y=self_cons_over_yr[0, :], name='Self consumption',
+                    offset=0.0)
+    title_str = 'Amortization schedule'
+    
+    layout = go.Layout(#barmode='stack', 
+                       #title=title_str,
+                       width=800,height=300,
+                       yaxis=dict(title='MWh',range=[ylim_var,None]),
+                       margin=dict(
+                           l=50,
+                           r=50,
+                           b=10,
+                           t=10,
+                           pad=4),
+                       #paper_bgcolor="LightSteelBlue"
+    )
+    
+    # Create figure
+    fig_2 = go.Figure(data=[trace1, trace2], layout=layout)
+    
+    
+    ##
+    hourly_cons_over_yr = (hourly_cons.sum(axis=0).reshape(1,-1))/1000 
+    
+    diff_ca = self_cons_over_yr/hourly_cons_over_yr
+    ylim_var_2 = min(diff_ca[0,:])
+    ylim_var_2 = (1-(ylim_var_2*2))*np.min(hourly_cons_over_yr)
+    
+    # Create traces
+    trace1 = go.Bar(x=loan_yr_arr[0, :], y=hourly_cons_over_yr[0, :], name='Self consumption',
+                    marker = dict(color="#0068c9"),
+                    offset=0.0)
+    trace2 = go.Bar(x=loan_yr_arr[0, :], y=hourly_cons_over_yr[0, :]-self_cons_over_yr[0, :], name='Grid supply',
+                    offset=0.0,marker = dict(color="#83c9ff"))
+    title_str = 'Amortization schedule'
+    
+    layout = go.Layout(#barmode='stack', 
+                        #title=title_str,
+                        width=800,height=300,
+                        yaxis=dict(title='MWh',range=[ylim_var_2,None]),
+                        margin=dict(
+                            l=50,
+                            r=50,
+                            b=10,
+                            t=10,
+                            pad=4),
+                        #paper_bgcolor="LightSteelBlue"
+    )
+    
+    # Create figure
+    fig_3 = go.Figure(data=[trace1, trace2], layout=layout)
+    
 
     #%%  revenues
 
@@ -551,7 +615,7 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     output_arr = np.array([PBT_yr_no,IRR_val,NPV_val,useful_life])
     
 
-    return output_arr,fig,fig_npv,pie_plots_data,hourly_gen,method_sel,current_yr
+    return output_arr,fig,fig_npv,pie_plots_data,hourly_gen,method_sel,current_yr,fig_2,fig_3
 
 #%%
 
@@ -566,7 +630,7 @@ if 'b' in locals():
     if b:
         if 'fig_bar' not in st.session_state:
             st.session_state.fig_bar = go.Figure()
-        if 'fig_bar' not in st.session_state:
+        if 'fig_npv' not in st.session_state:
             st.session_state.fig_npv = go.Figure()
         if 'pie_plots_data_f' not in st.session_state:
             st.session_state.pie_plots_data_f = go.Figure()
@@ -576,7 +640,11 @@ if 'b' in locals():
             st.session_state.method_sel_r = 0 
         if 'current_yr' not in st.session_state:
             st.session_state.current_yr = 0 
-        result_f,fig_bar,fig_npv,pie_plots_data_f,hourly_gen_f,method_sel_r,current_yr = calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui)
+        if 'fig_en_clas' not in st.session_state:
+            st.session_state.fig_en_clas = go.Figure() 
+        if 'fig_en_clas_2' not in st.session_state:
+            st.session_state.fig_en_clas_2 = go.Figure() 
+        result_f,fig_bar,fig_npv,pie_plots_data_f,hourly_gen_f,method_sel_r,current_yr,fig_2,fig_3 = calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui)
         st.session_state.result_f = result_f
         st.session_state.fig_bar = fig_bar
         st.session_state.fig_npv = fig_npv
@@ -584,12 +652,16 @@ if 'b' in locals():
         st.session_state.hourly_gen_f = hourly_gen_f
         st.session_state.method_sel_r = method_sel_r
         st.session_state.current_yr = current_yr
+        st.session_state.fig_en_class = fig_2
+        st.session_state.fig_en_class_2 = fig_3
         
  
 output_arr = st.session_state.result_f
 if 'fig_bar' in st.session_state:
     fig_bar_plot = st.session_state.fig_bar
     fig_npv_plot = st.session_state.fig_npv
+    fig_en_clas_plot = st.session_state.fig_en_class
+    fig_en_clas_2_plot = st.session_state.fig_en_class_2
 
 if type(output_arr) is not int:
 
@@ -608,6 +680,20 @@ if type(output_arr) is not int:
         unsafe_allow_html=True
     )
         
+col1, col2 = st.columns([1,1])
+with col1:
+    if 'fig_en_clas_plot' in locals():
+        if fig_en_clas_plot is not None:
+            st.subheader("Energy generation portfolio")
+            st.plotly_chart(fig_en_clas_plot,use_container_width=True)
+            
+with col2:           
+    if 'fig_en_clas_2_plot' in locals():
+        if fig_en_clas_2_plot is not None:
+            st.subheader("Energy consumption portfolio")
+            st.plotly_chart(fig_en_clas_2_plot,use_container_width=True)
+
+
 col1, col2 = st.columns([1.25,1])
 with col1:
     if 'fig_bar_plot' in locals():
@@ -664,17 +750,54 @@ if 'pie_plots_data_f' in st.session_state:
         
         
     with col2:
-        st.subheader("Daily PV potential")
+      
+        multi_fact = 7
+        if multi_fact == 1:
+            tit_str = "Daily PV potential"
+        elif multi_fact == 7:
+            tit_str = "Weekly PV potential"
+        else:        
+            tit_str = str(multi_fact)+" days combined PV potential"
+        
+        st.subheader(tit_str)
+      
         hourly_gen_f = st.session_state.hourly_gen_f
         yr_sel_arr_2 = st.slider('Select year', 2020, int(2020+output_arr[3]-1),2022,1,key="en_yr_slider")
         year_considered_2 = 0 + yr_sel_arr_2 - 2020 # if first year
-        new_mat = hourly_gen_f.reshape(365,24,hourly_gen_f.shape[1]).sum(axis=1)
-        days_of_year = np.arange(1, 365 + 1)
+        new_mat = hourly_gen_f.reshape(365,24*1,hourly_gen_f.shape[1]).sum(axis=1)
+        
+        
+        new_mat = hourly_gen_f
+        
+        
+        
+        ##
+        div_factor_avg = 24*multi_fact  ## no of hours in a day
+        days_of_year = np.arange(1, int(new_mat.shape[0]/div_factor_avg) + 1)
+    
+        if (new_mat.shape[0] % div_factor_avg) != 0:
+            no_of_grs_avg = (int(new_mat.shape[0]/div_factor_avg))-1
+        else:
+            no_of_grs_avg = (int(new_mat.shape[0]/div_factor_avg))   
+            
+        new_mat_t = new_mat[0:div_factor_avg*no_of_grs_avg,:]
+        new_mat_t = new_mat[0:div_factor_avg*no_of_grs_avg,:]
+
+        # ## now creating the rest of the rows not prcoessed in the previous step
+        
+        new_mat_t_2 = new_mat[div_factor_avg*no_of_grs_avg:,:].sum(axis=0)   
+        new_mat_t_2 = new_mat_t_2.reshape(1,-1)
+                    
+        new_mat_t = new_mat_t.reshape(no_of_grs_avg,div_factor_avg,new_mat_t.shape[1]).sum(axis=1)        
+        
+        new_mat_t_3 = np.concatenate((new_mat_t,new_mat_t_2),axis=0)
+             
+        ##
         
         fig_en_gen = go.Figure()
         
         # Add a scatter trace for the line plot
-        fig_en_gen.add_trace(go.Scatter(x=days_of_year, y=new_mat[:,year_considered_2],mode='lines', line=dict(color='cyan')))  # Adjust the color as needed
+        fig_en_gen.add_trace(go.Scatter(x=days_of_year, y=new_mat_t_3[:,year_considered_2],mode='lines', line=dict(color='cyan')))  # Adjust the color as needed
     
         
         # Update layout for dark theme
