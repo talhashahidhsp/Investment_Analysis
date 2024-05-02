@@ -443,9 +443,9 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     
     # Create traces
     trace1 = go.Bar(x=loan_yr_arr[0, :], y=hourly_gen_over_yr[0, :], name='Fed into the grid',
-                    offset=0.0)
+                    marker = dict(color="#83c9ff"),offset=0.0)
     trace2 = go.Bar(x=loan_yr_arr[0, :], y=self_cons_over_yr[0, :], name='Self consumption',
-                    offset=0.0)
+                    marker = dict(color="#0068c9"),offset=0.0)
     title_str = 'Amortization schedule'
     
     layout = go.Layout(#barmode='stack', 
