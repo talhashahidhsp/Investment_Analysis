@@ -441,6 +441,7 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     ylim_var = int((1-(ylim_var*3))*np.min(hourly_gen_over_yr))
     ylim_var_m = (np.max(hourly_gen_over_yr))*1.01
     
+    
     # Create traces
     trace1 = go.Bar(x=npv_yr_arr[0, :], y=hourly_gen_over_yr[0, :], name='Fed into the grid',
                     marker = dict(color="#83c9ff"),offset=0.0)
@@ -451,7 +452,7 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     layout = go.Layout(#barmode='stack', 
                        #title=title_str,
                        width=800,height=300,
-                       yaxis=dict(title='MWh',range=[ylim_var,ylim_var_m]),
+                       yaxis=dict(title='MWh',range=[400,ylim_var_m]),
                        margin=dict(
                            l=50,
                            r=50,
@@ -484,7 +485,7 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     layout = go.Layout(#barmode='stack', 
                         #title=title_str,
                         width=800,height=300,
-                        yaxis=dict(title='MWh',range=[ylim_var_2,ylim_var_2_m]),
+                        yaxis=dict(title='MWh',range=[400,ylim_var_2_m]),
                         margin=dict(
                             l=50,
                             r=50,
