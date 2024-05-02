@@ -423,7 +423,7 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     
 
     
-    
+    npv_yr_arr = np.arange(2020,2019+useful_life+0,1).reshape(1,-1)
 
     #%% net metering fee
 
@@ -442,9 +442,9 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     ylim_var_m = (np.max(hourly_gen_over_yr))*1.01
     
     # Create traces
-    trace1 = go.Bar(x=loan_yr_arr[0, :], y=hourly_gen_over_yr[0, :], name='Fed into the grid',
+    trace1 = go.Bar(x=npv_yr_arr[0, :], y=hourly_gen_over_yr[0, :], name='Fed into the grid',
                     marker = dict(color="#83c9ff"),offset=0.0)
-    trace2 = go.Bar(x=loan_yr_arr[0, :], y=self_cons_over_yr[0, :], name='Self consumption',
+    trace2 = go.Bar(x=npv_yr_arr[0, :], y=self_cons_over_yr[0, :], name='Self consumption',
                     marker = dict(color="#0068c9"),offset=0.0)
     title_str = 'Amortization schedule'
     
@@ -474,10 +474,10 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     ylim_var_2_m = (np.max(hourly_cons_over_yr))*1.01
     
     # Create traces
-    trace1 = go.Bar(x=loan_yr_arr[0, :], y=hourly_cons_over_yr[0, :], name='Self consumption',
+    trace1 = go.Bar(x=npv_yr_arr[0, :], y=hourly_cons_over_yr[0, :], name='Self consumption',
                     marker = dict(color="#0068c9"),
                     offset=0.0)
-    trace2 = go.Bar(x=loan_yr_arr[0, :], y=hourly_cons_over_yr[0, :]-self_cons_over_yr[0, :], name='Grid supply',
+    trace2 = go.Bar(x=npv_yr_arr[0, :], y=hourly_cons_over_yr[0, :]-self_cons_over_yr[0, :], name='Grid supply',
                     offset=0.0,marker = dict(color="#83c9ff"))
     title_str = 'Amortization schedule'
     
