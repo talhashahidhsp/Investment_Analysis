@@ -423,7 +423,7 @@ def calculate_func(input_vars_list,method_sel,data,avg_method_sel_ui):
     
 
     
-    npv_yr_arr = np.arange(2020,2019+useful_life+0,1).reshape(1,-1)
+    npv_yr_arr = np.arange(2020,2019+useful_life+1,1).reshape(1,-1)
 
     #%% net metering fee
 
